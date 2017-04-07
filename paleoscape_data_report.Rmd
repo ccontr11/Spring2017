@@ -1,0 +1,9 @@
+---
+title:"paleoscape data"
+date: "Apil 6, 2017"
+output: html_document
+---
+
+'''{r setup, include=FALSE}
+library(Rcurl)
+'''

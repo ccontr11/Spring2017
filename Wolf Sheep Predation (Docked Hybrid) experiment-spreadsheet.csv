@@ -1,0 +1,25 @@
+"BehaviorSpace results (NetLogo 5.3.1)"
+"Wolf Sheep Predation (Docked Hybrid).nlogo"
+"experiment"
+"04/05/2017 12:52:51:655 -0700"
+"min-pxcor","max-pxcor","min-pycor","max-pycor"
+"-20","20","-20","20"
+"[run number]"
+"show-energy?",
+"predationRate",
+"wolves-death-rate",
+"predatorEfficiency",
+"wolf-gain-from-food",
+"initial-number-sheep",
+"wolf-reproduce",
+"sheep-reproduce",
+"sheep-max-initial-energy",
+"initial-number-wolves",
+"[reporter]"
+"[final]",
+"[min]",
+"[max]",
+"[mean]",
+"[steps]",
+
+"[all run data]"
