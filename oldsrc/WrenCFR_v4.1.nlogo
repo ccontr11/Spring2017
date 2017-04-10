@@ -1,3 +1,107 @@
+;; Version 4.1 - Aug 2016 - Marco edits - Dec 2016 adding
+;;s marco added a energy cut-off for camp movement. Not sure on best way to implement still, but shows cool trade-off with max_kcal_to_collect. I intended to blend into pick-patch but maybe shouldn't
+;;x marco fixed an overall kcal counter
+;;x fixed prob where potmeat wasn't getting added to kcal counter
+;;x marco suggested global knowledge should be put back in (fixed with pick-patch-global-tidal-foresight)
+;; need to build hunter-centric patch choice, right now based on foraging only. How does days-of-foresight work here?
+;;;; added a pick-patch-hunt, but it's a shell until we figure out how to do it.
+;;;; Ache model just chooses based on best vt, but need to rank in advance.
+;;;; Kim (Jul 18) suggest camps move because local veg depletes (and gatherers have nothing to do), even if where they move to is based on hunting. So marco's thresh would have to be on plant data alone? Or plant OR mammal below thresh?
+;;;; compare hunter-centric to gather-centric camp movement
+;;x need to add mean/sd return rates instead of fixed amount. Would match our input data better. (gathering done, hunting done, uses procedure var_kcal_return mean stdev to pull val)
+;; should set up a run-set to compare no marine foraging, chance marine foraging, vs foresighted marine foraging
+
+;; Version 4.0 - Summer 2016
+;; need to add hunting. w/ hunting change big enough to be v4. Fork it to maintain 3.x as CAA paper version.
+;; pulling all possible from Ache v1.1b. Log changes here
+;;;x scrapping cooperative hunting, flocking, and complex trajectories
+;;;s switch all times to hours, prey weights to kcal
+;;;x agents hg switch to determine whether they are a hunter or a gatherer. agentsets on hg to make hunters and gathers. makes optional to jump an agent from one team to other.
+;;; need math to convert density to Kim's time until encounter from 100m transects.
+;;; pull in adaptivecamp, running average of previous days returns I think.
+
+;;x forage procedure forked to be gather and hunt. currently run after the other, problem?
+;;x bug that probably should be back-ported to 3.4, forager's pick-patch doesn't factor in the 2h morning thing. (Fixed in 3.4, port in pick-patch-local-tidal-land-old)
+;;x forager pick-patch doesn't count adjacent 6-2 hour terrestrial foraging, could be significant and otherwise is substantially taxing marine (pick-patch-local-tidal-land updated)
+;; should probably scrap "campless" and "global-knowledge" to simplify code, keep random move (camp and forager) as control
+;;x move-hunt is very exclusive slow (fixed, was in-radius of patches-vt, changed to patches with [vt > 0])
+;; build in various strategies for pick-patch depending on different assumptions, max kcal, max hunting, lowest risk, etc.
+;; add a minimum distance for camp movement as a "transaction cost" (Marco) of moving the camp. reminds me of inertia. Ache used 1km. still not sure on the best way to implement this.
+
+
+
+;; Version 3.4 - Summer 2016
+;; anything else before CAA2016 paper written?
+;; plant seasonality data in Jan's PeerJ paper needs to be incorporated. Not exactly possible in current condition... need original data tables and update R scripts to process
+;; might be fixed? issue where camps pick a patch (probably based on foresight), but foragers disagree and go harvest somewhere else... Camps pick based on one cell, ie one forager. Not looking at availability for the whole camp, but highest return.
+
+;; Version 3.3 - March 2016
+;;x fixed pick-patch-local issue with foragers having too much shellfish foraging time in the calculation
+;; plant seasonality data in Jan's PeerJ paper needs to be incorporated. Not exactly possible in current condition... need original data tables and maybe Chloe to process
+;; issue where camps pick a patch (probably based on foresight), but foragers disagree and go harvest somewhere else... Camps pick based on one cell, ie one forager. Not looking at availability for the whole camp, but highest return
+;;x need to set up the experiments in behaviourspace
+;;x Replace the time discounting formula with hyperbolic, add range from literature into behaviourspace
+;;x 35 foragers in one camp is weird, replace with range of agents per camp, & number of camps
+;;x    true but replaced to previous because of test of impact of camp sociality. Bigger groups better or worse?
+;;x add setting to convert between zoomed maps and full scale
+
+;; Version 3.2 - Jan 2016
+;;x pick-patch-local-tidal-foresight doesn't have the 2h coastal harvest in right now... (a long complex equation now, but fixed)
+;;x odd effect when agents head for better patches along an edge but camp won't move there (camp-mobility calc was off by a lot, fixed, has cascading effects)
+;;x when camp decides to make a longer distance trip to coast, do foragers still harvest along the way? should we expect them to? (with camp-mobility fixed, distance is huge they can cover most of map in a day. also can but don't have to)
+;;x camps are aware of coastal patches that are depleted by another group even if out of visual range (can't fix without making in-range coastal cells seem like they're unexploited even if aren't)
+;;x the whole harvest coastal for few hours then plant bit is a little off still
+;;x foragers pick a distant cell but then harvest while walking towards it, thus wasting time on unproductive resources. Should walk straight to without harvesting. (fixed, changes dynamic hugely bc camps and foragers cover way more ground per day now)
+;; Curtis wants them to harvest shellfish twice a day, or factor in 4 hours of coastal harvest. hard to orchestrate in a 5.9 h work day. do they get more hours on spring tide? Do they take first two and last two?
+;; need to set up the experiments in behaviourspace
+;; plant seasonality assuming the data via Jan indicates that. Will need to build in a tidal-cycle like system for the seasonal variations
+;;x Fix the time discounting to be less steep, ie. 1/(1+r)^t instead of 1/t. Get Kim to give me a value for r. Chose 0.05 for now as a low but present discount rate.
+
+;; Version 3.0
+;;x Constant return rate while continuous depletion of resources until gone
+;;x    Cope with semi-harvested patches, running out of time before harvested, running out of resources before time up, etc.
+;;x Replenish yearly, patch based countdown until harvested. Partial harvest reset.
+;;x Global knowledge of camps, how to implement without major slowdown
+;;x Travel vs harvest speeds, ie. time-walk-cell vs time-harvest-cell
+;;x Update tidal-cycle, motivation of mod-cog movement (global knowledge kinda does this already, distance weighted as above)
+;;x Camp movement routing, B-line vs Greedy-Heuristic (camp-mobility fixed makes this moot. Can cover most of map in a day)
+;;x Minimize forager spreading, some kind of flocking procedure, check out Ache. (not sure if necessary, foragers never spread much since they're tied to camp location)
+;;x Camps are overlapping when knowledge base similar, need anti-flocking (basic move to random if best_patch is occupied)
+;;x Need a ceiling on kcal harvestable in one day. Some of these return rates are silly (added slider for this on GUI, should get a value from Kim)
+;;b Need to harvest shellfish twice a day, or factor in 4 hours of coastal harvest (pick-patch-local-tidal in the works, but not there yet)
+;;x Counters for camps days without food and patches times_harvested for model output
+;;x Camp mobility now based on % of walk-speed * foraging-time. This means camps won't outrun agents too much, but is based on walking not harvesting time
+;;x Agents need to predict the future based on a certain number of foresight_days, how do I weigh it so they don't arrive before the tide? [1/1 1/2 1/3 1/4... 1/n]
+
+
+;; Kim's new idea is that each additional skill we must give agents is a new clue to their cognitive evolution
+;; As a part of this, what is the simplest rule (heuristic) that agents can use to get close to the actual optimal solution without a costly cognitive mechanism
+;;
+;; 1) Use lunar-cycle to predict the tides
+;; 2) Predict others' behaviour so they don't all head for the same patch (forage-campless-predict, need new solution since this makes temporal synchrony impossible)
+;; 3) Weigh return rates against travel time  (pick-patch-global -local)
+;; 4) Cost of sociality (camps?)
+;; 5) Travelling salesmen/ routing B-line vs Greedy-heuristic, or will pick-patch-global do it anyway?
+;; 6) Reduce risk by staying near other foragers (maybe just a check against distance, maybe patch-set based on radius around all other agents, hard to do with sequential forage-campless-predict)
+
+
+;; version 2
+;; hectare scale, 2x zoom regions to make patch count as Ache
+;; Habitat/prey/patch? Key difference is when the return rate depletes from the perspective of the agent. Is it within forage as they go, or only after they're done in update-patches?
+;; Global (with error, maybe error by distance) vs local knowledge? Wasn't implemented.
+;; Working in improved efficencies when I see them
+
+;; Version 1
+;; AML 520 Final Project
+;; Fall 2014
+;; Chloe Atwater
+
+;; "Happy Model"
+;; no depletion
+;; no death
+;; no war or territoriality
+
+
 extensions [ gis profiler ]
 globals [
   vegetation                 ; input data of vegetation types for each patch
@@ -12,6 +116,7 @@ globals [
   ;newday                    ; boolean; 0=not new day, 1=new day
   ;time                      ; time that has passed during a day
   days-until-tide            ; days until next good tidal cycle
+  springdays                 ; current count of spring tide days left, 5 on first day, decreases over course of tide
   tideday                    ; ranges from 0-14 over the tidal cycle, last 5 are springdays
   kcal_vt1
   kcal_vt2                   ; globals to keep track of kcal foraged in each vt
@@ -27,17 +132,12 @@ globals [
   kcal_vt13
   kcal_vt14
   patches-vt
-  patches-vt10
   patches-coast
   mean_dailykcal
   mean_dailykm
   time-walk-cell
   camp-mobility
 
-  ; coast
-  mult-undepl
-  mult-repl
-  mult-depl
   ;hunting
   success-rate              ; list of success rates for each species (doesn't vary per habitat)
   pursuit-time              ; list of pursuit times for each species
@@ -48,7 +148,6 @@ globals [
   hunt-time                 ; time spend hunting different species
   meat_vt                   ; for each vegetation type the weight of animals caught
   hunters gathers           ; agentsets to hold each agent type. (like breed but more flexible)
-  memoryfood                ; number of days the camps use to evaluate whether productivity of camp is sufficient to stay
   ]
 patches-own [
   vt                        ; vegetation/coastal resource type
@@ -97,7 +196,6 @@ camps-own [
   directioncamp             ; direction to which camp will move
   leftorright               ; randomly defined boolean whether agents go initially left or right to the camp at the start of the day
   kcal_per_day              ; total kcal accumulated each day
-  hist_kcal_per_day         ; list of total kcal accumulated for the last x days
   kcal_total                ; total kcal accumulated throughout entire scenario
   overall_avg_kcal          ; mean kcal per agent per day
   timecoast                 ; camps track their distance to the coast, for use in mod-cog scenario
@@ -143,17 +241,14 @@ to setup
   ca
   reset-ticks
 
-  ;; SEED FOR TESTING
-  random-seed 1
-
   ;;*****SET UP VEGETATION*****
-  ;; import dataset:  "data/chloe_final_abm_map_24nov14_test.asc"
+  ;; import dataset:  "raster_files/chloe_final_abm_map_24nov14_test.asc"
   ifelse map-zone = "z1" OR map-zone = "z2" [
-      set vegetation gis:load-dataset (word "data/allhab_1ha_" map-zone ".asc")
+      set vegetation gis:load-dataset (word "raster_files/allhab_1ha_" map-zone ".asc")
       resize-world 0 299 0 199 set-patch-size 1.75
   ]
   [ ; full size
-      set vegetation gis:load-dataset "data/all_habitats_1ha.asc"
+      set vegetation gis:load-dataset "raster_files/all_habitats_1ha.asc"
       resize-world 0 779 0 539 set-patch-size 0.65
   ]
 
@@ -162,7 +257,6 @@ to setup
   gis:apply-raster vegetation vt
   set patches-vt (patch-set patches with [vt > 0])
   set patches-coast (patch-set patches with [vt >= 10])
-  set patches-vt10 (patch-set patches with [vt > 0 and vt < 10])
 
   ;; assign veg types initial kcal/hr return rates and harvest times
   ask patches-vt [
@@ -221,14 +315,7 @@ to setup
       )]
 
   ]
-  ask patches-coast [
-  set mult-undepl (list kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return kcal_return kcal_return kcal_return kcal_return kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return kcal_return kcal_return kcal_return kcal_return) ; looped over two cycles to account for long temporal foresight range
-  set mult-repl (list 0 0 0 0 0 0 0 0 0 0 kcal_return kcal_return kcal_return kcal_return kcal_return kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return kcal_return kcal_return kcal_return kcal_return)
-  set mult-depl (list 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return kcal_return kcal_return kcal_return kcal_return)
-  ]
   set nrspecies 28
-
-  set memoryfood 7
 
   ;need return rate per species based on animal weight (actually calories to make comparable). Ache had one species rt-rate list
 ;  let i 0
@@ -246,17 +333,18 @@ to setup
   ]
 
   ;;*****SET UP CAMPS*****
-
-  create-camps nrcamps
+  if camps?
   [
-    move-to one-of patches-vt
-    set cx pxcor                              ; set cx and cy for agents to find their camp
-    set cy pycor
-    set shape "house"
-    set color red
-    set size 5
-    set hidden? false
-    set hist_kcal_per_day (list 2000 2000 2000 2000 2000 2000 2000)
+    create-camps nrcamps
+    [
+      move-to one-of patches-vt
+      set cx pxcor                              ; set cx and cy for agents to find their camp
+      set cy pycor
+      set shape "house"
+      set color red
+      set size 5
+      set hidden? false
+    ]
   ]
 
   ;;*****SET UP AGENT-GATHERERS*****
@@ -269,8 +357,8 @@ to setup
     set time-forage-budget daily-time-budget
     set dailykcal 0
     set dailykm 0
-    set hidden? true
-    set campsite min-one-of camps [count agents-here ] move-to campsite
+    set hidden? false
+    ifelse camps? [set campsite min-one-of camps [count agents-here ] move-to campsite][move-to one-of patches-vt with [vt = 3]]
   ]
 
   ;;*****SET UP AGENT-HUNTERS*****
@@ -283,8 +371,8 @@ to setup
     set time-forage-budget daily-time-budget
     set dailykcal 0
     set dailykm 0
-    set hidden? true
-    set campsite min-one-of camps [count agents-here ] move-to campsite
+    set hidden? false
+    ifelse camps? [set campsite min-one-of camps [count agents-here ] move-to campsite][move-to one-of patches-vt with [vt = 3]]
   ]
 
   ;for now setup hunters and gatherers, this might not work in future for task-switching. Or alternatively will need to be updated later.
@@ -295,7 +383,7 @@ to setup
   ;set day 0
   ;set tide "poor"
   set cum_kcal 0
-  set time-walk-cell 1 / walk-speed / 10                              ;flip walk-speed to hours / hectare so 2 km/h = .05 hours / hectare
+  set time-walk-cell 1 / walk-speed / 10                              ;flip walk-speed to hours / hectare so 5 km/h = .02 hours / hectare
   set camp-mobility daily-time-budget * walk-speed * 10 * 0.75        ;need to set a good value so that agents have time to harvest during the day. this was the purpose of the campless experiments but i'm not sure we came to a good answer.
   ;set newday 1
   ask patches-vt [set current_kcal_return kcal_return_min]
@@ -310,10 +398,10 @@ to setup
   [
     let temp (list)
     let i 1
-    ;let r discount_rate
+    let r discount_rate
     ;repeat days_of_foresight [set temp lput (1 / i * current_kcal_return) temp set i i + 1]        ; inverse temporal distance weighting [1/1, 1/2, 1/3... 1/days_of_foresight]
-    ;repeat days_of_foresight [set temp lput (1 / ((1 + discount_rate) ^ i) * current_kcal_return) temp set i i + 1]        ; weaker net present value rate 1/(1+r)^t, exponential
-    repeat days_of_foresight [set temp lput (current_kcal_return / (1 + discount_rate * i)) temp set i i + 1]        ; weaker net present value rate 1/(1+r*t), hyperbolic
+    ;repeat days_of_foresight [set temp lput (1 / ((1 + r) ^ i) * current_kcal_return) temp set i i + 1]        ; weaker net present value rate 1/(1+r)^t, exponential
+    repeat days_of_foresight [set temp lput (current_kcal_return / (1 + r * i)) temp set i i + 1]        ; weaker net present value rate 1/(1+r*t), hyperbolic
     ;repeat days_of_foresight [set temp lput kcal_return temp]
     set temporal_multiplier sum temp                                          ;this value is the temporally weighted return in calories for one hour a day of x days_of_foresight. Essentially a kcal/hr with foresighted days weighed in. Multiply it against daily-time-budget for total kcal harvest over those days, sorta...
     ;if self = patch 50 50 [print temp]
@@ -358,9 +446,9 @@ end
 
 to go
   tick
-  tidal-cycle
-  update-patches
-
+;  ifelse camps? [
+    tidal-cycle
+    update-patches
     run (word "display-" display-mode)
 
     update-campsites
@@ -369,27 +457,13 @@ to go
       if count hunters > 0 [hunt]
     ][stop]
 
-    ask camps [
-       if kcal_per_day / count agents with [campsite = myself] < 100 [set days_without days_without + 1]
-       ifelse length hist_kcal_per_day < memoryfood
-       [set hist_kcal_per_day lput (kcal_per_day / (count agents with [campsite = myself])) hist_kcal_per_day ]
-       [
-          let i 0
-          while [i < (memoryfood - 1)]
-          [
-            set hist_kcal_per_day replace-item i hist_kcal_per_day item (i + 1) hist_kcal_per_day
-            set i i + 1
-          ]
-          set hist_kcal_per_day replace-item (memoryfood - 1) hist_kcal_per_day (kcal_per_day / (count agents with [campsite = myself]))
-       ]
-    ]
 
     ask camps [
       set kcal_total kcal_total + kcal_per_day
-   ;   set overall_avg_kcal (kcal_total / ticks / count agents with [campsite = myself])
-      set overall_avg_kcal mean [hist_kcal_per_day] of self
+      set overall_avg_kcal (kcal_total / ticks / count agents with [campsite = myself])
       set total-harvest-time 0 set current_kcal_return 0 set time-until-replenished 365 set pcolor black     ;hack to keep camps moving, though reasonable
     ]
+;  ][go-campless]
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -429,32 +503,55 @@ to tidal-cycle
 
   ;; kcal returns for each tidal state
   if tideday = 0 [
-    ask patches-coast [if current_kcal_return > kcal_return_min [set current_kcal_return kcal_return_min]]
+    set springdays 0
+    ask patches-coast [    ;moved these to setup by making kcal_return and kcal_return_min for non-spring and non-low tide values
+;      if vt = 10  [set total-harvest-time .5 set kcal_return 105 ]    ; Aeolianite (Coastal)
+;      if vt = 12  [set total-harvest-time .5 set kcal_return 105 ]    ; TMS Boulders (Coastal)
+;      if vt = 13  [set total-harvest-time .5 set kcal_return 105 ]    ; TMS Eroded Rocky Headlands (Coastal)
+;      if vt = 14  [set total-harvest-time .5 set kcal_return 105 ]    ; TMS Wave Cut Platforms (Coastal
+      if current_kcal_return > kcal_return_min [set current_kcal_return kcal_return_min]
+    ]
   ]
   if tideday = 10 [
-    ask patches-coast [set current_kcal_return kcal_return]
-  ]
-  set days-until-tide 10 - tideday ; there are 10 poor days in between tidal cycles
+    set springdays 5 + 1      ;should be 5 but substracted below so init 5 + 1
+    ask patches-coast [
+;      if vt = 10  [set total-harvest-time .5 set kcal_return 1615]
+;      if vt = 12  [set total-harvest-time .5 set kcal_return 1294]
+;      if vt = 13  [set total-harvest-time .5 set kcal_return 1294]
+;      if vt = 14  [set total-harvest-time .5 set kcal_return 1294]
+      set current_kcal_return kcal_return
+    ]]
+  set days-until-tide 10 - tideday ; there are 11 poor days in between tidal cycles
+  ;print (word "days of tide left: " springdays )
+  if springdays > 0 [set springdays springdays - 1]     ; possibly use as a multiplier against current_kcal_return for tidal prediction
+  ;if days-until-tide < 0 [set days-until-tide 0]
 
+
+
+  ; revised to take current depletion into account, took ifelse-value out of pick-patch- for patches-coast
   ask patches-coast
   [
     ;init with undepleted case
-    let mult mult-undepl
+    let mult (list kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return kcal_return kcal_return kcal_return kcal_return kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return kcal_return kcal_return kcal_return kcal_return) ; looped over two cycles to account for long temporal foresight range
     if current_kcal_return = 0
       [
-        ifelse tideday < 10 [set mult mult-repl] ; case of tide being replenished at next spring
-        [set mult mult-depl] ;else tideday >= 10 ; case of tide being replenished to low at next non-spring
+        ifelse tideday < 10 [ ; case of tide being replenished at next spring
+          set mult (list 0 0 0 0 0 0 0 0 0 0 kcal_return kcal_return kcal_return kcal_return kcal_return kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return kcal_return kcal_return kcal_return kcal_return)
+        ]
+        [ ;else tideday >= 10 ; case of tide being replenished to low at next non-spring
+          set mult (list 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return_min kcal_return kcal_return kcal_return kcal_return kcal_return)
+        ]
       ]
+    let sub_mult sublist mult tideday (tideday + days_of_foresight)
+    let weights (list)
     let i 1
-    set temporal_multiplier 0
-    while [i <= days_of_foresight]
-    [
-      set temporal_multiplier temporal_multiplier + (1 / (1 + discount_rate * i)) * item (tideday + i) mult ; hyperbolic
-   ;   set temporal_multiplier temporal_multiplier + (1 / (1 + discount_rate ^ i)) * item (tideday + i) mult ; exponential discounting
-      set i i + 1
-    ]
+    let r discount_rate
+    ;repeat days_of_foresight [set weights lput ( 1 / i ) weights set i i + 1]
+    ;repeat days_of_foresight [set weights lput (1 / ((1 + r) ^ i)) weights set i i + 1]    ;exponential
+    repeat days_of_foresight [set weights lput (1 / (1 + r * i)) weights set i i + 1]       ;hyperbolic time-discounting
+    set temporal_multiplier sum (map * sub_mult weights)     ;should this multiplier reflect the 2h (or 4) limit of coastal foraging?
   ]
-; check the calculation of temporal_multiplier later. Now it is the discounted sum of the harvest for the next N (= days_of_foresight days).
+
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -463,6 +560,7 @@ to update-campsites          ;maybe replace camp-mobility with walkable distance
 
   ask camps [
     if overall_avg_kcal < camp-move-threshold [     ;not sure I like the location of this, but camps have to be below a kcal harvest threshold to both moving.
+    ;show overall_avg_kcal
     set kcal_per_day 0
     ifelse spatial-foresight = true [
       spatial-foresight-movement
@@ -475,7 +573,6 @@ to update-campsites          ;maybe replace camp-mobility with walkable distance
         [move-to p]
       ]; close while
     ]; close spatial-foresight else
-    set hist_kcal_per_day []
   ]]
 end
 
@@ -539,8 +636,9 @@ to gather
             ; whether they move to the best patch in this radius is determined by the switch "forager-movement"; code is under "move" process
             ;if (current_kcal_return = 0 OR current_kcal_return < mean [current_kcal_return] of patches-vt in-radius vision) [move] ;"neighbors better" MVT
             move-gather     ;jan16 foragers pick a distant cell but then harvest towards it so never reach. issue bc timecamp is based on harvesting on the way home.
+            ;update-numbers          ;update-numbers is now in "move"
           ]
-          [ ;else no extra foraging time left, "forage on the way home"
+          [ ;else no time left, "forage on the way home"
             face campsite
             let found 0
             ifelse [vt] of patch-ahead 1 > 0
@@ -579,7 +677,9 @@ to gather
           set days_without days_without + 1
         ]
         ask camps [
+
           set kcal_per_day sum [dailykcal] of gathers with [campsite = myself]
+          if kcal_per_day / count gathers with [campsite = myself] < 100 [set days_without days_without + 1]
         ]
       ]
     ]  ;close while
@@ -644,6 +744,7 @@ to hunt
         ]
         ask camps [ ;not sure this is right with the split. maybe put back into go.
           set kcal_per_day kcal_per_day + sum [dailykcal] of hunters with [campsite = myself]
+          if kcal_per_day / count hunters with [campsite = myself] < 100 [set days_without days_without + 1]     ;this line really isn't right as hunting days and forager days make it double counting.
         ]
       ]
     ]  ;close while
@@ -655,22 +756,14 @@ to move-gather
   ifelse forager-movement = "random" [
     let p one-of neighbors with [current_kcal_return > 0]
     ifelse p != nobody [move-to p][move-to one-of neighbors with [vt > 0]]
-    set time-forage-budget time-forage-budget - time-walk-cell
-    update-gather-numbers
   ]
-  [  ; find best patch within vision radius, then move to that patch
-    let best-patch self
-    ifelse days-until-tide = 0 [
-      set best-patch pick-patch-local-tidal
-    ][
-      set best-patch max-one-of patches in-radius vision-forager [current_kcal_return * ([time-forage-budget] of myself - (time-walk-cell * distance myself))]
-    ]
+  [; else if forager-movement = "local-patch-choice" [                 ; find best patch within vision radius, then move to that patch
+    let best-patch pick-patch-local-tidal
     ifelse best-patch != patch-here and [current_kcal_return] of best-patch > 0
     [
       ifelse distance best-patch < 1.5                       ;if neighbouring cell move there then harvest, else move towards but don't harvest on the way
       [
         move-to best-patch
-        set time-forage-budget time-forage-budget - time-walk-cell
         update-gather-numbers
       ][ ;else farther so walk towards
         face best-patch
@@ -685,23 +778,22 @@ to move-gather
       ] ;close if distance
     ]
     [
-      let p one-of neighbors with [current_kcal_return > 0]
-    ifelse p != nobody [move-to p][move-to one-of neighbors with [vt > 0]]
-    set time-forage-budget time-forage-budget - time-walk-cell
-    update-gather-numbers
       ;else best-patch is here or best-patch is empty (in dead zone)
-   ;   ifelse current_kcal_return = 0 [                                                     ; was random walking if unable to find a quality patch, now they walk towards nearest non-zero patch
-   ;     let p min-one-of patches with [current_kcal_return > 0] [distance myself]
-   ;     let dp distance p
-   ;     if [vt] of p > 0 [
-   ;       move-to p
-   ;       set time-forage-budget time-forage-budget - (time-walk-cell * dp)
-   ;       set dailykm dailykm + (.1 * dp)
-   ;       ]
-   ;   ] ;have them walk towards nearest non-zero return
-   ;   [ ;else
-   ;    ; update-gather-numbers
-   ;   ]
+      ifelse current_kcal_return = 0 [                                                     ; was random walking if unable to find a quality patch, now they walk towards nearest non-zero patch
+        ;move-to one-of neighbors with [vt > 0]
+        let p min-one-of patches with [current_kcal_return > 0] [distance myself]
+        ;face p
+        ask p [set pcolor red]
+        let dp distance p
+        if [vt] of p > 0 [
+          move-to p
+          set time-forage-budget time-forage-budget - (time-walk-cell * dp)
+          set dailykm dailykm + (.1 * dp)
+          ]
+      ] ;maybe have them walk towards nearest non-zero return
+      [ ;else
+        update-gather-numbers
+      ]
     ]
   ]
 end
@@ -718,21 +810,63 @@ to move-hunt
 ;  set dailykm dailykm + (.1 * dp)
 end
 
+to move-campless
+  ifelse forager-movement = "random" [
+    move-to one-of neighbors with [vt > 0]
+  ]
+  [; else if forager-movement = "local-patch-choice" [                                             ; find best patch within vision radius, then move to that patch
+    let best-patch (patch 0 0)
+    ifelse (global-knowledge?)
+    [
+      set best-patch pick-patch-global
+    ][ ;else restricted to vision radius
+      set best-patch pick-patch-local;-tidal                ;this is slower than the global knowledge option above, using a patch-set stops netlogo from optimizing the in-radius option
+    ]
+    ifelse best-patch != patch-here and [current_kcal_return] of best-patch > 0
+    [
+      ifelse distance best-patch < 1.5
+      [
+        move-to best-patch
+        update-gather-numbers
+      ][ ;else farther so walk there
+        face best-patch
+        ifelse is-patch? patch-ahead 1 and [vt > 0] of patch-ahead 1 [
+          move-to patch-ahead 1
+          set time-forage-budget time-forage-budget - time-walk-cell
+        ][ ;else     if you can't move to or towards the best, move anywhere!
+          move-to one-of neighbors with [vt > 0]
+          update-gather-numbers
+        ]
+      ] ;close if distance
+    ]
+    [
+      ;else best-patch is here
+      ifelse current_kcal_return = 0 [move-to one-of neighbors with [vt > 0] ] ;or have them pick-patch-global and loop back? maybe too complex, but would allow them to escape random walking in the ether
+      [ ;else
+        update-gather-numbers
+      ]
+    ]
+  ]
 
+end
 
 to-report pick-patch-global                  ;currently assuming that every camp has full knowledge of other camps.
+  ifelse camps?
+  [
     report max-one-of patches-vt [current_kcal_return * (daily-time-budget - (time-walk-cell * distance myself))]                   ;this doesn't work because camp-mobility is restricted, also camps set out for tide even if not going to make it before end of spring tide
+  ][
+    report max-one-of patches-vt [current_kcal_return * ([time-forage-budget] of myself - (time-walk-cell * distance myself))]
+  ]
 end
 
 to-report pick-patch-global-tidal-foresight          ;clone of the local version but for the full land patch set instead of just in-radius
   ifelse is-camp? self
   [
-     let p max-one-of patches-vt [
+    let p max-one-of patches with [vt > 0] [
       ifelse-value goodcoast?
       [
         ;next line is for coastal cells, it adds calories for 2 h of coastal foraging and rest of day of terrestrial foraging on the nearest terrestrial cell, then subtracts out calories lost from traveling instead of foraging in place as usual.
         (ifelse-value (current_kcal_return > 0) [temporal_multiplier] [0] * 2) + ([ifelse-value (current_kcal_return > 0) [temporal_multiplier] [0]] of one-of patches in-radius 2 with [vt > 0 AND vt < 10] * (daily-time-budget - 2)) - (distance myself / camp-mobility * daily-time-budget * current_kcal_return)
-
       ]
       [
         ifelse-value (current_kcal_return > 0) [temporal_multiplier] [0] * daily-time-budget - (distance myself / camp-mobility * daily-time-budget * current_kcal_return)
@@ -760,17 +894,27 @@ to-report pick-patch-local ;[anticipated-return]
 end
 
 to-report pick-patch-local-tidal
-  ; calculates the best patch to gather when the tide is right for shellfish gathering
-    let coastpatch min-one-of patches-coast [distance myself]
-    ifelse (time-forage-budget > daily-time-budget - 2) and ((time-forage-budget < (time-walk-cell * (distance coastpatch))))          ;low tide coastal or terrestrial, after that terrestrial only. problem since 2 tides a day, could have used torches for new moon, even without on full. Change to 4 hours and ignore that they're not sequential?
+  ;report min-one-of patches in-radius vision with-max [current_kcal_return][distance myself]
+  ;report max-one-of patches in-radius vision [(current_kcal_return * ([time-forage-budget] of myself - (time-walk-cell * distance myself)))]
+  ;let p max-one-of (patch-set patches in-radius vision patches-coast) [current_kcal_return * ([time-forage-budget] of myself - (time-walk-cell * distance myself))]
+  ; if coast only 2h (but 3h more terrestrial if available), if terrestrial 6h
+  ifelse is-camp? self    ;supposed to be used for foragers
+  [
+    report one-of patches
+  ]
+  [
+    ifelse time-forage-budget > daily-time-budget - 2 ;and days-until-tide = 0         ;low tide coastal or terrestrial, after that terrestrial only. problem since 2 tides a day, could have used torches for new moon, even without on full. Change to 4 hours and ignore that they're not sequential?
     [
       let p max-one-of (patch-set patches in-radius vision-forager patches-coast) [current_kcal_return * (2 - (daily-time-budget - [time-forage-budget] of myself) - (time-walk-cell * distance myself))]
+      ;ask p [set pcolor red]
       report p
     ]
     [ ;else rest of day on terrestrial
       let p max-one-of patches in-radius vision-forager [ifelse-value (goodcoast? AND current_kcal_return > 0) [kcal_return_min][current_kcal_return] * ([time-forage-budget] of myself - (time-walk-cell * distance myself))]
+      ;ask p [set pcolor red]
       report p
     ]
+  ]
 end
 
 to-report pick-patch-local-tidal-foresight
@@ -929,8 +1073,10 @@ end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;direct pull from Ache v1.1b. Lots of adjustments for these to be properly incorporated.
+
 to encounterprocedure ; check whether a species is encountered
-  if [vt] of patch-here > 0 [
+  if [vt] of patch-here > 0 [ ;just to make sure that we are on a cell of the park
     let species []
     let ii 0
     while [ii < nrspecies]  ; define list of species
@@ -951,7 +1097,6 @@ end
 
 ; for each type of encounter we add the average time for each pursuit and the probability of a successful hunt (including the options of cooperative hunting)
 to updatespecies [draw] ; for a given species
-
   if ((draw != 8) or (draw = 8 and ticks > 242)) [ ;cw day is based on seasonality, need to work in how I'll do that here. change to tick for now
     if random-float 1 < ((item draw encounter * item draw relencounter) * ( (item draw enc-dep) ^ ([crowding] of patch-here - 1))) [     ;this is the prob of encounter part, input encounter unit is in N encounters / 100 m
       let exp-rt-rate item draw rt-rate
@@ -1023,7 +1168,12 @@ end
 
 
 to-report kcal-avg
+  ifelse camps? [
     report mean [overall_avg_kcal] of camps
+  ]
+  [
+    report mean_dailykcal
+  ]
 end
 
 to display-vt
@@ -1079,7 +1229,7 @@ to-report patches-at-radius [rad]
 end
 
 to display-none
-  if ticks <= 1 [if display-mode = "vt" [display-vt]]
+  if ticks <= 1 [display-vt]
 end
 
 to display-time-replenished
@@ -1122,6 +1272,68 @@ end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+to go-campless     ;deprecated, not sure if it will still function as needed or not, but is not current anyway.
+  tidal-cycle
+  update-patches
+  run (word "display-" display-mode)
+  ;forage-campless
+  gather-campless;-predict
+  ;  ask camps [      ;update this to be foragers keeping track of kcal/day
+  ;    set kcal_total kcal_total + kcal_per_day
+  ;    set overall_avg_kcal (kcal_total / (day * nragents * 2))
+  ;  ]
+  ;update-kcal
+  set mean_dailykcal mean [dailykcal] of agents
+  set mean_dailykm mean [dailykm] of agents
+  set cum_kcal cum_kcal + sum [dailykcal] of agents
+  set cum_km cum_km + sum [dailykm] of agents
+
+  tick
+end
+
+to gather-campless
+    ;;*****INITIALIZE A NEW DAY*****
+  ask agents [
+    set dailykcal 0
+    set dailykm 0
+    set time-forage-budget daily-time-budget
+    set done 0
+   ]
+
+  ;; *****ACTUAL FORAGING (INCLUDING KEEPING TRACK OF TIME AND DISTANCE TO CAMP)*****
+  ;; references to time-walk-cell in here need to be updated re: logic of having vt specific harvest times vs. gloabl time-walk-cell
+  let allagentsdone 0
+  while [allagentsdone = 0] ;all agent movement happens within a tick, good but hard to eval since you can't see inside the loop very well
+    [
+      ask agents with [done = 0][
+        ifelse time-forage-budget > pass-harvest-time                        ; true if time budget is greater than the time it takes to harvest current cell, could be mistake if next patch has higher passs-harvest-time
+          [ ; time left for foraging
+
+
+            ;if ([current_kcal_return] of patch-here = 0 OR [current_kcal_return] of patch-here < mean [current_kcal_return] of patches in-radius vision) [move] ;"vision window better" MVT slow
+            ;if ([current_kcal_return] of patch-here = 0 OR [current_kcal_return] of patch-here < mean [current_kcal_return] of patches in-radius 1.5) [move] ;"neighbors better" MVT    ; maybe don't need since they take closest anyway
+            move-campless
+            update-gather-numbers
+          ]
+          [ ;else no time left
+            ifelse time-forage-budget > time-walk-cell
+            [
+              ;placeholder for moving without harvesting at the end of the day
+              set time-forage-budget time-forage-budget - time-walk-cell
+            ][
+              set done 1
+            ]
+          ]
+      ] ;close ask agents
+
+      if not any? agents with [done = 0] [
+        set allagentsdone 1
+        ;ask camps [
+        ;  set kcal_per_day sum [dailykcal] of agents
+        ;]
+      ]
+    ]  ;close while
+end
 
 to test1
    ask pick-patch-global [set pcolor red]
@@ -1193,7 +1405,7 @@ BUTTON
 126
 76
 go
-go
+ifelse camps? [go][go-campless]
 T
 1
 T
@@ -1225,7 +1437,7 @@ BUTTON
 126
 109
 tick
-go
+ifelse camps? [go][go-campless]
 NIL
 1
 T
@@ -1247,10 +1459,10 @@ forager-movement
 1
 
 MONITOR
-1025
-12
-1164
-57
+773
+11
+912
+56
 mean-daily-kcal-per-agent
 kcal-avg
 0
@@ -1258,10 +1470,10 @@ kcal-avg
 11
 
 PLOT
-1025
-460
-1544
-701
+764
+503
+1283
+744
 time-foraged-by-habitat
 NIL
 NIL
@@ -1299,10 +1511,10 @@ spatial-foresight
 -1000
 
 PLOT
-1173
-12
-1373
-162
+921
+11
+1121
+161
 daily kcal
 NIL
 NIL
@@ -1348,10 +1560,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-1070
-111
-1120
-156
+818
+110
+868
+155
 NIL
 days-until-tide
 17
@@ -1359,10 +1571,10 @@ days-until-tide
 11
 
 BUTTON
-1387
-16
-1458
-49
+1135
+15
+1206
+48
 profiler
 setup                  ;; set up the model\nprofiler:start         ;; start profiling\nrepeat 10 [ go ]       ;; run something you want to measure\nprofiler:stop          ;; stop profiling\nprint profiler:report  ;; view the results\nprofiler:reset         ;; clear the data
 NIL
@@ -1376,10 +1588,10 @@ NIL
 1
 
 PLOT
-358
-586
-558
-736
+359
+503
+559
+653
 Mean daily km
 ticks
 current-kcal-return
@@ -1396,9 +1608,9 @@ PENS
 
 PLOT
 560
-587
+503
 760
-737
+653
 coast distance
 ticks
 distance from coast
@@ -1410,13 +1622,13 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "if plots? and ticks > 0  [plotxy ticks mean [distance min-one-of patches with [goodcoast? = true] [distance myself]] of camps]"
+"default" 1.0 0 -16777216 true "" "if plots? and ticks > 0 and camps? [plotxy ticks mean [distance min-one-of patches with [goodcoast? = true] [distance myself]] of camps]"
 
 SWITCH
-1383
-133
-1486
-166
+1131
+132
+1234
+165
 plots?
 plots?
 1
@@ -1424,20 +1636,20 @@ plots?
 -1000
 
 CHOOSER
-162
-654
-286
-699
+144
+529
+268
+574
 map-zone
 map-zone
 "z1" "z2" "full"
 2
 
 BUTTON
-1386
-57
-1499
-90
+1134
+56
+1247
+89
 profiler module
 profiler:start         ;; start profiling\nask agents [set time-forage-budget 5.9]\nrepeat 100 [ \nask agents [\nask pick-patch-local-tidal [set pcolor orange]\nask pick-patch-local-tidal-land-old [set pcolor yellow]\nask pick-patch-local-tidal-land [set pcolor red]\n]\n]\n       ;; run something you want to measure\nprofiler:stop          ;; stop profiling\nprint profiler:report  ;; view the results\nprofiler:reset         ;; clear the data
 NIL
@@ -1451,14 +1663,14 @@ NIL
 1
 
 CHOOSER
-18
-657
-158
-702
+144
+484
+284
+529
 display-mode
 display-mode
 "vt" "kcal" "hybrid" "time-replenished" "times-harvested" "none"
-3
+1
 
 BUTTON
 82
@@ -1466,7 +1678,7 @@ BUTTON
 137
 248
 range
-  ask one-of camps [\n    ask patches-at-radius vision-camp [set pcolor red]\n    ask patches-at-radius camp-mobility [set pcolor blue]\n  ]\n\nask one-of agents [\n  ask patches-at-radius vision-forager [set pcolor yellow] \n  \n]
+if camps? [\n  ask one-of camps [\n    ask patches-at-radius vision-camp [set pcolor red]\n    ask patches-at-radius camp-mobility [set pcolor blue]\n  ]\n]\nask one-of agents [\n  ask patches-at-radius vision-forager [set pcolor yellow] \n  ]\n
 NIL
 1
 T
@@ -1487,11 +1699,22 @@ daily-time-budget
 5.9 10
 0
 
+SWITCH
+4
+115
+107
+148
+camps?
+camps?
+0
+1
+-1000
+
 MONITOR
-1025
-57
-1164
-102
+773
+56
+912
+101
 mean-daily-km-per-agent
 mean_dailykm
 0
@@ -1509,11 +1732,21 @@ global-knowledge?
 1
 -1000
 
+TEXTBOX
+182
+590
+332
+632
+Ache model used 1-15 hunters/camp\n1-3 camps
+11
+0.0
+1
+
 BUTTON
-1387
-96
-1500
-129
+1135
+95
+1248
+128
 profile-noreset
 profiler:start         ;; start profiling\nrepeat 10 [ go ]       ;; run something you want to measure\nprofiler:stop          ;; stop profiling\nprint profiler:report  ;; view the results\nprofiler:reset         ;; clear the data
 NIL
@@ -1583,10 +1816,21 @@ NIL
 HORIZONTAL
 
 MONITOR
-1020
-111
-1070
-156
+868
+110
+918
+155
+NIL
+springdays
+0
+1
+11
+
+MONITOR
+768
+110
+818
+155
 NIL
 tideday
 0
@@ -1602,17 +1846,17 @@ days_of_foresight
 days_of_foresight
 1
 5
-1
+5
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-1020
-156
-1092
-189
+768
+155
+840
+188
 bluepicks
 ;ask camp 0 [repeat 100 [test4 ask pick-patch-local-tidal-foresight [set current_kcal_return 0]]]\nrepeat 100 [ask camps [test4 ask pick-patch-local-tidal-foresight [set current_kcal_return 0]]]
 NIL
@@ -1626,10 +1870,10 @@ NIL
 1
 
 BUTTON
-1092
-156
-1163
-189
+840
+155
+911
+188
 travel days
 ask patches [set plabel \"\"]\nask camp 0 [ask n-of 100 patches in-radius vision-camp [set plabel-color blue set plabel precision (distance myself / camp-mobility) 1]]
 NIL
@@ -1643,10 +1887,10 @@ NIL
 1
 
 BUTTON
-1020
-189
-1093
-222
+768
+188
+841
+221
 distweight
 ask patches [set plabel \"\"]\nask camp 2 [ask n-of 30 (patch-set patches in-radius vision-camp patches-coast)[set plabel round (ifelse-value (current_kcal_return > 0 or goodcoast?) [temporal_multiplier] [0] * daily-time-budget - (distance myself / camp-mobility * daily-time-budget * current_kcal_return ))]]\nask camp 2 [test4]\n;ask camp 2 [inspect pick-patch-local-tidal-foresight]
 NIL
@@ -1703,10 +1947,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-1005
-346
-1062
-391
+753
+345
+810
+390
 hunters
 count hunters
 0
@@ -1714,10 +1958,10 @@ count hunters
 11
 
 MONITOR
-1062
-346
-1119
-391
+810
+345
+867
+390
 gathers
 count gathers
 0
@@ -1742,10 +1986,10 @@ NIL
 1
 
 BUTTON
-1020
-222
-1093
-255
+768
+221
+841
+254
 dw forager
 ask patches [set plabel \"\"]\nask agent 10 [\nset time-forage-budget 5.9\nask n-of 30 (patch-set patches in-radius vision-camp patches-coast) with [vt > 0] [\n  set plabel round (\n      max (list \n        ;marine: if (daily-left) + travel < tide, tide - (daily-left) - travel, 0\n        ((current_kcal_return * (ifelse-value ((daily-time-budget - [time-forage-budget] of myself) + (time-walk-cell * distance myself) < 2) [2 - (daily-time-budget - [time-forage-budget] of myself) - (time-walk-cell * distance myself)][0])) + \n        ;terrestrial: if (daily-left) + travel < tide, daily-tide, left-travel\n          ([current_kcal_return] of one-of patches in-radius 2 with [vt > 0 AND vt < 10] * \n            ifelse-value ((daily-time-budget - [time-forage-budget] of myself) + (time-walk-cell * distance myself) < 2) [daily-time-budget - 2] [[time-forage-budget] of myself - (time-walk-cell * distance myself)] \n            ))\n        (ifelse-value (goodcoast? AND current_kcal_return > 0) [kcal_return_min] [current_kcal_return] * ([time-forage-budget] of myself - (time-walk-cell * distance myself)))\n      ))\n]\n]\n\nask agent 10 [ask pick-patch-local-tidal-land [\n  set plabel round (\n      max (list \n        ;marine: if (daily-left) + travel < tide, tide - (daily-left) - travel, 0\n        ((current_kcal_return * (ifelse-value ((daily-time-budget - [time-forage-budget] of myself) + (time-walk-cell * distance myself) < 2) [2 - (daily-time-budget - [time-forage-budget] of myself) - (time-walk-cell * distance myself)][0])) + \n        ;terrestrial: if (daily-left) + travel < tide, daily-tide, left-travel\n          ([current_kcal_return] of one-of patches in-radius 2 with [vt > 0 AND vt < 10] * \n            ifelse-value ((daily-time-budget - [time-forage-budget] of myself) + (time-walk-cell * distance myself) < 2) [daily-time-budget - 2] [[time-forage-budget] of myself - (time-walk-cell * distance myself)] \n            ))\n        (ifelse-value (goodcoast? AND current_kcal_return > 0) [kcal_return_min] [current_kcal_return] * ([time-forage-budget] of myself - (time-walk-cell * distance myself)))\n      ))\n]\n]\nask agent 10 [test3]\n
 NIL
@@ -2116,7 +2360,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 5.1.0
+NetLogo 5.3.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -2348,79 +2592,6 @@ setup</setup>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plots?">
       <value value="false"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="experiment1" repetitions="1" runMetricsEveryStep="true">
-    <setup>reset-timer
-setup</setup>
-    <go>go</go>
-    <timeLimit steps="300"/>
-    <metric>kcal-avg</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt = 1]</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt = 2]</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt = 3]</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt = 4]</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt = 5]</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt = 6]</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt = 7]</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt = 8]</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt = 9]</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt = 10]</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt = 11]</metric>
-    <metric>sum [times-harvested * kcal_return] of patches with [vt &gt;= 12]</metric>
-    <metric>mean [days_without] of camps / ticks</metric>
-    <metric>mean [days_without] of agents / ticks</metric>
-    <metric>timer</metric>
-    <enumeratedValueSet variable="plots?">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="discount_rate">
-      <value value="0.1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="daily-time-budget">
-      <value value="5.9"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="vision-camp">
-      <value value="50"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="forager-movement">
-      <value value="&quot;local-patch-choice&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="max_kcal_to_harvest">
-      <value value="3000"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="days_of_foresight">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="display-mode">
-      <value value="&quot;time-replenished&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="nragents">
-      <value value="30"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="walk-speed">
-      <value value="2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="map-zone">
-      <value value="&quot;full&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="camp-move-threshold">
-      <value value="1500"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="global-knowledge?">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="hunter-percent">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="vision-forager">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="spatial-foresight">
-      <value value="true"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="nrcamps">
-      <value value="25"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>

@@ -7,3 +7,49 @@ output: html_document
 '''{r setup, include=FALSE}
 library(Rcurl)
 '''
+
+#Experiment 1
+  experiment setup:
+    5 repetitions, 1000 time limit
+  
+  Variables: 
+    ["walk-speed" 2]
+    ["map-zone" "full"]
+    ["nragents" 30]
+    ["max_kcal_to_harvest" 3000]
+    ["days_of_foresight" 1]
+    ["plots?" true]
+    ["vision-camp" 50]
+    ["display-mode" "time-replenished"]
+    ["global-knowledge?" true]
+    ["discount_rate" 0.1]
+    ["daily-time-budget" 5.9]
+    ["nrcamps" 25]
+    ["spatial-foresight" true]
+    ["vision-forager" 10]
+    ["camp-move-threshold" 1500]
+    ["hunter-percent" 0.5]
+    ["forager-movement" "local-patch-choice"]
+  
+  Reporters: 
+    kcal-avg
+    sum [times-harvested * kcal_return] of patches with [vt = 1]
+    sum [times-harvested * kcal_return] of patches with [vt = 2]
+    sum [times-harvested * kcal_return] of patches with [vt = 3]
+    sum [times-harvested * kcal_return] of patches with [vt = 4]
+    sum [times-harvested * kcal_return] of patches with [vt = 5]
+    sum [times-harvested * kcal_return] of patches with [vt = 6]
+    sum [times-harvested * kcal_return] of patches with [vt = 7]
+    sum [times-harvested * kcal_return] of patches with [vt = 8]
+    sum [times-harvested * kcal_return] of patches with [vt = 9]
+    sum [times-harvested * kcal_return] of patches with [vt = 10]
+    sum [times-harvested * kcal_return] of patches with [vt = 11]
+    sum [times-harvested * kcal_return] of patches with [vt >= 12]
+    mean [days_without] of camps / ticks
+    mean [days_without] of agents / ticks
+    timer
+    
+## Read data from csv file
+'''{r}
+E1<-read.csv("Experiment-speadsheet.csv”, header=TRUE, skip=32, commen.char="#")
+

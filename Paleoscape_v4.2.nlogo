@@ -144,7 +144,7 @@ to setup
   reset-ticks
 
   ;; SEED FOR TESTING
-  random-seed 1
+  ;random-seed 1
 
   ;;*****SET UP VEGETATION*****
   ;; import dataset:  "data/chloe_final_abm_map_24nov14_test.asc"
@@ -1419,7 +1419,7 @@ SWITCH
 166
 plots?
 plots?
-0
+1
 1
 -1000
 
@@ -2350,11 +2350,11 @@ setup</setup>
       <value value="false"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="experiment2" repetitions="50" runMetricsEveryStep="false">
+  <experiment name="experiment2" repetitions="1" runMetricsEveryStep="false">
     <setup>reset-timer
 setup</setup>
     <go>go</go>
-    <timeLimit steps="3000"/>
+    <timeLimit steps="3650"/>
     <exitCondition>count patches with [current_kcal_return &gt; 0] &lt; (count agents)</exitCondition>
     <metric>kcal-avg</metric>
     <metric>sum [times-harvested * kcal_return] of patches with [vt = 1]</metric>
@@ -2388,7 +2388,7 @@ setup</setup>
       <value value="1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plots?">
-      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="vision-camp">
       <value value="50"/>
