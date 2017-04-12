@@ -1535,7 +1535,7 @@ nrcamps
 nrcamps
 0
 30
-25
+30
 1
 1
 NIL
@@ -2350,11 +2350,11 @@ setup</setup>
       <value value="false"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="experiment2" repetitions="1" runMetricsEveryStep="false">
+  <experiment name="experiment1" repetitions="10" runMetricsEveryStep="false">
     <setup>reset-timer
 setup</setup>
     <go>go</go>
-    <timeLimit steps="3650"/>
+    <timeLimit steps="365"/>
     <exitCondition>count patches with [current_kcal_return &gt; 0] &lt; (count agents)</exitCondition>
     <metric>kcal-avg</metric>
     <metric>sum [times-harvested * kcal_return] of patches with [vt = 1]</metric>
@@ -2380,12 +2380,15 @@ setup</setup>
     </enumeratedValueSet>
     <enumeratedValueSet variable="nragents">
       <value value="30"/>
+      <value value="20"/>
+      <value value="10"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_kcal_to_harvest">
       <value value="3000"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="days_of_foresight">
       <value value="1"/>
+      <value value="5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plots?">
       <value value="false"/>
@@ -2406,7 +2409,10 @@ setup</setup>
       <value value="5.9"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="nrcamps">
+      <value value="30"/>
       <value value="25"/>
+      <value value="15"/>
+      <value value="10"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="spatial-foresight">
       <value value="true"/>
