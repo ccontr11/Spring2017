@@ -176,8 +176,8 @@ to setup
     if vt = 8  [set total-harvest-time 0.65   set kcal_return 100]      ; Thicket                   Safra seed pods
     if vt = 9  [set total-harvest-time 0.70   set kcal_return 468]     ; Limestone Fynbos           1.8 kg/ha sour fig * 52% edible, 500 kcal / kg of apple
     if vt = 10 [set total-harvest-time 1.5   set kcal_return 1450   set kcal_return_min 250]      ; Aeolianite (Coastal); the coastal rates here are "poor", the most common state
-    if vt = 11 [set total-harvest-time 1.5   set kcal_return 150]      ; Sandy Beach (Coastal); only coastal vt with a fixed return
-    if vt = 12 [set total-harvest-time 1.5   set kcal_return 1100   set kcal_return_min 250]      ; TMS Boulders (Coastal)
+    if vt = 11 [set total-harvest-time 1.5   set kcal_return 150]      ; "Sandy Beach (Coastal); only coastal vt with a fixed return
+    if vt = 12 [set total-harvest-time 1.5   set kcal_return 1100   set kcal_return_min 250]      ; "TMS Boulders (Coastal)
     if vt = 13 [set total-harvest-time 1.5   set kcal_return 1100   set kcal_return_min 250]      ; TMS Eroded Rocky Headlands (Coastal)
     if vt = 14 [set total-harvest-time 1.5   set kcal_return 1100   set kcal_return_min 250]      ; TMS Wave Cut Platforms (Coastal)
 
@@ -1164,8 +1164,8 @@ GRAPHICS-WINDOW
 779
 0
 539
-0
-0
+1
+1
 1
 ticks
 30.0
@@ -1535,7 +1535,7 @@ nrcamps
 nrcamps
 0
 30
-30
+20
 1
 1
 NIL
@@ -2350,12 +2350,11 @@ setup</setup>
       <value value="false"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="experiment1" repetitions="10" runMetricsEveryStep="false">
+  <experiment name="experiment3" repetitions="1" runMetricsEveryStep="true">
     <setup>reset-timer
 setup</setup>
-    <go>go</go>
-    <timeLimit steps="365"/>
-    <exitCondition>count patches with [current_kcal_return &gt; 0] &lt; (count agents)</exitCondition>
+    <go>repeat 30 [go]</go>
+    <timeLimit steps="120"/>
     <metric>kcal-avg</metric>
     <metric>sum [times-harvested * kcal_return] of patches with [vt = 1]</metric>
     <metric>sum [times-harvested * kcal_return] of patches with [vt = 2]</metric>
@@ -2372,6 +2371,7 @@ setup</setup>
     <metric>mean [days_without] of camps / ticks</metric>
     <metric>mean [days_without] of agents / ticks</metric>
     <metric>timer</metric>
+    <metric>mean [distance min-one-of patches with [goodcoast? = true] [distance myself]] of camps</metric>
     <enumeratedValueSet variable="walk-speed">
       <value value="2"/>
     </enumeratedValueSet>
@@ -2380,15 +2380,12 @@ setup</setup>
     </enumeratedValueSet>
     <enumeratedValueSet variable="nragents">
       <value value="30"/>
-      <value value="20"/>
-      <value value="10"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_kcal_to_harvest">
       <value value="3000"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="days_of_foresight">
       <value value="1"/>
-      <value value="5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="plots?">
       <value value="false"/>
@@ -2409,10 +2406,7 @@ setup</setup>
       <value value="5.9"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="nrcamps">
-      <value value="30"/>
-      <value value="25"/>
-      <value value="15"/>
-      <value value="10"/>
+      <value value="20"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="spatial-foresight">
       <value value="true"/>

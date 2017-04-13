@@ -1,55 +1,91 @@
 ---
-title:"paleoscape data"
+title:"paleoscape data/plots"
 date: "Apil 6, 2017"
 output: html_document
 ---
 
-'''{r setup, include=FALSE}
-library(Rcurl)
-'''
+```{r setup, include=FALSE}
+library(RCurl)
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 #Experiment 1
-  experiment setup:
-    5 repetitions, 1000 time limit
+ 
+Experiment setup:
+  1 repetition, 240 time limit
+
+Variables:
+  ["walk-speed" 2]
+  ["map-zone" "full"]
+  ["nragents" 30]
+  ["max_kcal_to_harvest" 3000]
+  ["days_of_foresight" 1]
+  ["plots?" false]
+  ["vision-camp" 50]
+  ["display-mode" "time-replenished"]
+  ["global-knowledge?" true]
+  ["discount_rate" 0.1]
+  ["daily-time-budget" 5.9]
+  ["nrcamps" 20]
+  ["spatial-foresight" true]
+  ["vision-forager" 10]
+  ["camp-move-threshold" 1500]
+  ["hunter-percent" 0.5]
+  ["forager-movement" "local-patch-choice"]
+
+Reporters: 
+  kcal-avg
+  sum [times-harvested * kcal_return] of patches with [vt = 1]
+  sum [times-harvested * kcal_return] of patches with [vt = 2]
+  sum [times-harvested * kcal_return] of patches with [vt = 3]
+  sum [times-harvested * kcal_return] of patches with [vt = 4]
+  sum [times-harvested * kcal_return] of patches with [vt = 5]
+  sum [times-harvested * kcal_return] of patches with [vt = 6]
+  sum [times-harvested * kcal_return] of patches with [vt = 7]
+  sum [times-harvested * kcal_return] of patches with [vt = 8]
+  sum [times-harvested * kcal_return] of patches with [vt = 9]
+  sum [times-harvested * kcal_return] of patches with [vt = 10]
+  sum [times-harvested * kcal_return] of patches with [vt = 11]
+  sum [times-harvested * kcal_return] of patches with [vt >= 12]
+  mean [days_without] of camps / ticks
+  mean [days_without] of agents / ticks
+  timer
+  mean [distance min-one-of patches with [goodcoast? = true] [distance myself]] of camps
+
+Commands:
+  Measure uns at evey step
+  Setup: 
+    reset-timer
+    setup
+  Go: 
+    repeat 15 [go]
   
-  Variables: 
-    ["walk-speed" 2]
-    ["map-zone" "full"]
-    ["nragents" 30]
-    ["max_kcal_to_harvest" 3000]
-    ["days_of_foresight" 1]
-    ["plots?" true]
-    ["vision-camp" 50]
-    ["display-mode" "time-replenished"]
-    ["global-knowledge?" true]
-    ["discount_rate" 0.1]
-    ["daily-time-budget" 5.9]
-    ["nrcamps" 25]
-    ["spatial-foresight" true]
-    ["vision-forager" 10]
-    ["camp-move-threshold" 1500]
-    ["hunter-percent" 0.5]
-    ["forager-movement" "local-patch-choice"]
-  
-  Reporters: 
-    kcal-avg
-    sum [times-harvested * kcal_return] of patches with [vt = 1]
-    sum [times-harvested * kcal_return] of patches with [vt = 2]
-    sum [times-harvested * kcal_return] of patches with [vt = 3]
-    sum [times-harvested * kcal_return] of patches with [vt = 4]
-    sum [times-harvested * kcal_return] of patches with [vt = 5]
-    sum [times-harvested * kcal_return] of patches with [vt = 6]
-    sum [times-harvested * kcal_return] of patches with [vt = 7]
-    sum [times-harvested * kcal_return] of patches with [vt = 8]
-    sum [times-harvested * kcal_return] of patches with [vt = 9]
-    sum [times-harvested * kcal_return] of patches with [vt = 10]
-    sum [times-harvested * kcal_return] of patches with [vt = 11]
-    sum [times-harvested * kcal_return] of patches with [vt >= 12]
-    mean [days_without] of camps / ticks
-    mean [days_without] of agents / ticks
-    timer
-    
-## Read data from csv file
-'''{r}
-E1<-read.csv("Experiment-speadsheet.csv”, header=TRUE, skip=32, commen.char="#")
+##read data
+
+```{r}
+require(ggplot2)
+E1<-read.csv("Paleoscape_v4.2_experiment3-table.csv", header = TRUE,skip = 6,comment.char ="#")
+
+names(E1)[c(1, 19:36)] <- c("run_number", "step", "kcal_avg", "Freshwater_wetlands", "Alluvial_Vegetation", "Strandveld", "Saline_Vegetation", "Renosterveld", "Sand_Fynbos", "v7", "Thicket", "Limestone_Fynbos", "Aeolianite_Coastal", "Sandy_Beach_Coastal", "TMS_Boulders_Coastal", "avg-days-no-camps","avg-days-no-agents", "timer","distance-from-coast")
+
+#read a source code for a function that plots multiple ggplots in one layer
+
+source("multiplot_function.R")
+```
+
+# Plot 1: avg kcal
+
+```{r, fig.width=18,fig.height=8}
+P1=ggplot(subset(E1, nragents == 30), aes(x = step, y = kcal_avg)) +
+  geom_line()+
+   labs(x = "tick = 15 days", y="average kcal")+
+theme(text = element_text(size=18))
+P2=ggplot(subset(E1, nragents == 30), aes(x = step, y = kcal_avg)) +
+  geom_point()+
+   labs(x = "days", y="average kcal")+
+theme(text = element_text(size=18))+
+    geom_smooth(span=1,method = "lm")
+
+multiplot(P1, P2, cols=2)
+```
 
