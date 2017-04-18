@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #Experiment 1
  
 Experiment setup:
-  1 repetition, 240 time limit
+  1 repetition, 240 time limit (* 15 time steps = 3000 ~ 10 years)
 
 Variables:
   ["walk-speed" 2]
@@ -64,7 +64,7 @@ Commands:
 
 ```{r}
 require(ggplot2)
-E1<-read.csv("Paleoscape_v4.2_experiment3-table.csv", header = TRUE,skip = 6,comment.char ="#")
+E1<-read.csv("Paleoscape_v4.2_experiment_table.csv", header = TRUE,skip = 6,comment.char ="#")
 
 names(E1)[c(1, 19:36)] <- c("run_number", "step", "kcal_avg", "Freshwater_wetlands", "Alluvial_Vegetation", "Strandveld", "Saline_Vegetation", "Renosterveld", "Sand_Fynbos", "v7", "Thicket", "Limestone_Fynbos", "Aeolianite_Coastal", "Sandy_Beach_Coastal", "TMS_Boulders_Coastal", "avg-days-no-camps","avg-days-no-agents", "timer","distance-from-coast")
 
@@ -80,11 +80,22 @@ P1=ggplot(subset(E1, nragents == 30), aes(x = step, y = kcal_avg)) +
   geom_line()+
    labs(x = "tick = 15 days", y="average kcal")+
 theme(text = element_text(size=18))
-P2=ggplot(subset(E1, nragents == 30), aes(x = step, y = kcal_avg)) +
-  geom_point()+
-   labs(x = "days", y="average kcal")+
-theme(text = element_text(size=18))+
-    geom_smooth(span=1,method = "lm")
+
+P2=ggplot(E1, aes(x = step)) +
+  geom_point(aes(y = Freshwater_wetlands / step, col = "Freshwater_wetlands")) + 
+    geom_point(aes(y = Alluvial_Vegetation / step, col = "Alluvial_Vegetation")) +
+  geom_point(aes(y = Strandveld / step, col = "Strandveld")) +   
+  geom_point(aes(y = Saline_Vegetation / step, col = "Saline_Vegetation")) +
+  geom_point(aes(y = Renosterveld / step, col = "Renosterveld")) +
+  geom_point(aes(y = Sand_Fynbos / step, col = "Sand_Fynbos")) +
+  geom_point(aes(y = Thicket / step, col = "Thicket")) +
+  geom_point(aes(y = Limestone_Fynbos / step, col = "Limestone_Fynbos")) +   
+  geom_point(aes(y = Aeolianite_Coastal / step, col = "Aeolianite_Coastal")) +
+  geom_point(aes(y = Sandy_Beach_Coastal / step, col = "Sandy_Beach_Coastal")) +
+  geom_point(aes(y = TMS_Boulders_Coastal / step, col = "TMS_Boulders_Coastal")) +
+    labs(y = "return rate * havest time/ time") +
+theme(text = element_text(size=18))
+
 
 multiplot(P1, P2, cols=2)
 ```

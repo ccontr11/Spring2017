@@ -58,7 +58,7 @@ patches-own [
   current_kcal_return       ; current kcal/hr return rate for each patch, under systematic-search-of-habitat assumption, is either vt-specific full or zero
   total-harvest-time        ; search/harvest time (hr/ha)           Varies from 0.63-17.9 hr/hectare. 17.9 is 3 or 4 person days worth of harvesting...
   pass-harvest-time         ; search/harvest time (hr/ha) to cross a patch once. Always total-time-harvest/5 since foragers cover a 20m wide swath of the 1ha cell
-  ;time-foraged-here         ; counts time foraged from each habitat, so we know where foragers are spending their time
+  time-foraged-here         ; counts time foraged from each habitat, so we know where foragers are spending their time
   ;kcal_foraged_here         ; counts kcal foraged from each habitat over time, so we know where their energy is coming from
   goodcoast?                ; boolean to exclude Sandy Beach from coastal foraging patches   ;should replace with a goodcoast patch-set
   time-until-replenished    ; veg replenishes after 365 days, counter gets reset to zero after each instance of harvesting (no half-patches replenishing at separtate times)
@@ -1105,6 +1105,7 @@ to update-gather-numbers          ; this is the accounting of harvesting agents 
   [
     set time-forage-budget time-forage-budget - pass-harvest-time
     ask patch-here [
+      set time-foraged-here time-foraged-here + 1
       set total-harvest-time total-harvest-time - pass-harvest-time
       set times-harvested times-harvested + 1            ;this needs to be fixed to properly account neap tide harvests in behaviourspace
       if total-harvest-time <= 0 [set total-harvest-time 0 set current_kcal_return 0 set time-until-replenished 365 set pcolor black]
@@ -1146,11 +1147,11 @@ end
 GRAPHICS-WINDOW
 218
 7
-1008
-578
+858
+458
 -1
 -1
-0.65
+1.75
 1
 10
 1
@@ -1161,9 +1162,9 @@ GRAPHICS-WINDOW
 0
 1
 0
-779
+299
 0
-539
+199
 1
 1
 1
@@ -1213,7 +1214,7 @@ nragents
 nragents
 1
 50
-30
+35
 1
 1
 NIL
@@ -1261,7 +1262,7 @@ PLOT
 1025
 460
 1544
-701
+727
 time-foraged-by-habitat
 NIL
 NIL
@@ -1273,19 +1274,19 @@ true
 true
 "" ""
 PENS
-"Alluvial" 1.0 1 -8990512 true "" ";if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 2] / sum [time-foraged-here] of patches]]"
-"Strandveld" 1.0 1 -6917194 true "" ";if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 3] / sum [time-foraged-here] of patches]]"
-"Saline" 1.0 1 -2139308 true "" ";if plots? [if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 4] / sum [time-foraged-here] of patches]]]"
-"Renosterveld" 1.0 1 -987046 true "" ";if plots? [if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 5] / sum [time-foraged-here] of patches]]]"
-"Sand Fynbos" 1.0 1 -8732573 true "" ";if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 6] / sum [time-foraged-here] of patches]]"
-"Thicket" 1.0 1 -11881837 true "" ";if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 8] / sum [time-foraged-here] of patches]]"
-"Limestone Fynbos" 1.0 1 -4699768 true "" ";if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 9] / sum [time-foraged-here] of patches]]"
-"Aeolianite" 1.0 1 -13210332 true "" ";if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 10] / sum [time-foraged-here] of patches]]"
-"Sandy Beach" 1.0 1 -817084 true "" ";if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 11] / sum [time-foraged-here] of patches]]"
-"TMS Boulders" 1.0 1 -8431303 true "" ";if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 12] / sum [time-foraged-here] of patches]]"
-"TMS Eroded Rocky Headlands" 1.0 1 -6459832 true "" ";if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 13] / sum [time-foraged-here] of patches]]"
-"TMS Wave Cut Platforms" 1.0 1 -5207188 true "" ";if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 14] / sum [time-foraged-here] of patches]]"
-"Freshwater wetlands" 1.0 0 -4528153 true "" ";if plots? [if ticks > 0 [plot sum [time-foraged-here] of patches with [vt = 1] / sum [time-foraged-here] of patches]]"
+"Alluvial" 1.0 1 -8990512 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 2] / sum [time-foraged-here] of patches]]]"
+"Strandveld" 1.0 1 -6917194 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 3] / sum [time-foraged-here] of patches]]]"
+"Saline" 1.0 1 -2139308 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 4] / sum [time-foraged-here] of patches]]]"
+"Renosterveld" 1.0 1 -987046 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 5] / sum [time-foraged-here] of patches]]]"
+"Sand Fynbos" 1.0 1 -8732573 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 6] / sum [time-foraged-here] of patches]]]"
+"Thicket" 1.0 1 -11881837 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 8] / sum [time-foraged-here] of patches]]]"
+"Limestone Fynbos" 1.0 1 -4699768 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 9] / sum [time-foraged-here] of patches]]]"
+"Aeolianite" 1.0 1 -13210332 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 10] / sum [time-foraged-here] of patches]]]"
+"Sandy Beach" 1.0 1 -817084 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 11] / sum [time-foraged-here] of patches]]]"
+"TMS Boulders" 1.0 1 -8431303 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 12] / sum [time-foraged-here] of patches]]]"
+"TMS Eroded Rocky Headlands" 1.0 1 -6459832 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 13] / sum [time-foraged-here] of patches]]]"
+"TMS Wave Cut Platforms" 1.0 1 -5207188 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 14] / sum [time-foraged-here] of patches]]]"
+"Freshwater wetlands" 1.0 0 -4528153 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 1] / sum [time-foraged-here] of patches]]]"
 
 SWITCH
 4
@@ -1326,7 +1327,7 @@ vision-camp
 vision-camp
 0
 50
-50
+15
 5
 1
 NIL
@@ -1341,7 +1342,7 @@ vision-forager
 vision-forager
 0
 75
-10
+20
 5
 1
 NIL
@@ -1386,7 +1387,7 @@ current-kcal-return
 0.0
 10.0
 0.0
-1.0
+0.5
 true
 false
 "" ""
@@ -1419,7 +1420,7 @@ SWITCH
 166
 plots?
 plots?
-1
+0
 1
 -1000
 
@@ -1431,7 +1432,7 @@ CHOOSER
 map-zone
 map-zone
 "z1" "z2" "full"
-2
+1
 
 BUTTON
 1386
@@ -1458,7 +1459,7 @@ CHOOSER
 display-mode
 display-mode
 "vt" "kcal" "hybrid" "time-replenished" "times-harvested" "none"
-3
+1
 
 BUTTON
 82
@@ -1535,7 +1536,7 @@ nrcamps
 nrcamps
 0
 30
-20
+18
 1
 1
 NIL
@@ -1772,6 +1773,70 @@ camp-move-threshold
 1
 NIL
 HORIZONTAL
+
+PLOT
+1291
+301
+1491
+451
+coast foraged rate
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 10]/ ticks]]]"
+"pen-1" 1.0 0 -7500403 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 11]/ ticks]]]"
+"pen-2" 1.0 0 -2674135 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt = 12]/ ticks]]]"
+"pen-3" 1.0 0 -955883 true "" "if plots? [if ticks > 0 [if sum [time-foraged-here] of patches > 0 [plot sum [time-foraged-here] of patches with [vt > 12]/ ticks]]]"
+"pen-4" 1.0 0 -6459832 true "" "if plots? [if ticks > 0 [plot tideday]]"
+
+MONITOR
+895
+103
+952
+148
+ticks
+ticks
+17
+1
+11
+
+PLOT
+768
+587
+968
+737
+plot 2
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 1]/ ticks]]"
+"pen-1" 1.0 0 -7500403 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 2]/ ticks]]"
+"pen-2" 1.0 0 -2674135 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 3]/ ticks]]"
+"pen-3" 1.0 0 -955883 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 4]/ ticks]]"
+"pen-4" 1.0 0 -6459832 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 5]/ ticks]]"
+"pen-5" 1.0 0 -1184463 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 6]/ ticks]]"
+"pen-6" 1.0 0 -10899396 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 7]/ ticks]]"
+"pen-7" 1.0 0 -13840069 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 8]/ ticks]]"
+"pen-8" 1.0 0 -14835848 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 9]/ ticks]]"
+"pen-9" 1.0 0 -11221820 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 10]/ ticks]]"
+"pen-10" 1.0 0 -13791810 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 11]/ ticks]]"
+"pen-11" 1.0 0 -13345367 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt = 12]/ ticks]]"
+"pen-12" 1.0 0 -8630108 true "" "if plots? [ if ticks > 0 [plot sum [times-harvested * kcal_return] of patches with [vt > 12]/ ticks]]"
+"pen-13" 1.0 0 -5825686 true "" ""
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -2350,11 +2415,11 @@ setup</setup>
       <value value="false"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="experiment3" repetitions="1" runMetricsEveryStep="true">
+  <experiment name="experiment4" repetitions="1" runMetricsEveryStep="true">
     <setup>reset-timer
 setup</setup>
-    <go>repeat 30 [go]</go>
-    <timeLimit steps="120"/>
+    <go>repeat 15 [go]</go>
+    <timeLimit steps="240"/>
     <metric>kcal-avg</metric>
     <metric>sum [times-harvested * kcal_return] of patches with [vt = 1]</metric>
     <metric>sum [times-harvested * kcal_return] of patches with [vt = 2]</metric>
